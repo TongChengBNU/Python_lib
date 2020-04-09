@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr  5 14:18:06 2020
+
+@author: 75934
+"""
+# 访问前需要登录，该问题尚未解决
+import requests
+import re
+
+def getHTMLText(url):
+    try: 
+        r = requests.get(url, timeout=30)
+        r.raise_for_status()
+        r.encoding = r.apparent_encoding
+        return r.text
+    except:
+        return ""
+    
+def parsePage(ilt, html):
+    try:
+        plt = re.findall(r'\"view_price\"\:\"[\d\.]*\"', html)
+        tlt = re.findall(r'\"raw_title\"\:\".*?\"', html)
+        for i in range(len(plt)):
+            price = eval(plt[i].split(':')[1])
+            title = eval(tlt[i].split(':')[1])
+            ilt.append([price, title])
+    except:
+        print("Error in parsePage")
+    
+def printGoodList(ilt):
+    tplt = "{:4}\t{:8}\t{:4}"
+    print(tplt.format("No.", "Price", "Name"))
+    count = 0
+    for g in ilt:
+        count = count + 1
+        print(tplt.format(count, g[0], g[1]))
+    
+def main():
+    goods = '书包'
+    depth = 2
+    start_url = "https://s.taobao.com/search?q=" + goods
+    infoList = []
+    for i in range(depth):
+        try:
+            url = start_url + '&s=' + str(44*i)
+            html = getHTMLText(url)
+            parsePage(infoList, html)
+        except:
+            print("Error" + str(i))
+    printGoodList(infoList)
+
+            
